@@ -61,7 +61,7 @@ class FanPlugin
     cb(null, on);
   }
 
-  getRotatonSpeed(cb) {
+  getRotationSpeed(cb) {
     cb(null, this.rpm);
   }
 
@@ -80,5 +80,3 @@ class FanPlugin
     return [this.fan];
   }
 }
-
-new FanPlugin({}, {});
