@@ -29,6 +29,8 @@ class FanPlugin
       mode: Gpio.OUTPUT
     });
     const dutycycle = 0.996;
+    //const dutycycle = 1.0;
+    this.motor.pwmFrequency(1); // to reduce impact on tach circuitry on 3-wire fans
     this.motor.pwmWrite(Math.round(dutycycle * 255));
 
 
