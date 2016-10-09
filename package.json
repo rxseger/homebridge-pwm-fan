@@ -1,0 +1,29 @@
+{
+  "name": "homebridge-gpio-fan",
+  "version": "0.0.1",
+  "description": "GPIO-based fan control (RPM, PWM) plugin for Homebridge",
+  "main": "fan.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/rxseger/homebridge-gpio-fan.git"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "pwm",
+    "rpm",
+    "fan"
+  ],
+  "author": "rxserger",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rxseger/homebridge-gpio-fan/issues"
+  },
+  "engines": {
+    "node": ">=6.0.0",
+    "homebridge": ">=0.2.0"
+  },
+  "homepage": "https://github.com/rxseger/homebridge-gpio-fan#readme"
+}
