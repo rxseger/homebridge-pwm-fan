@@ -1,8 +1,6 @@
 'use strict';
 
-
-const PiFastGpio = require('pi-fast-gpio');
-
+const child_process = require('child_process');
 let Service, Characteristic;
 
 module.exports = (homebridge) => {
@@ -21,32 +19,11 @@ class FanPlugin
     this.tach_bcm = 16;  // physical #36, BCM 16
     this.motor_bcm = 23; // physical #16, BCM 23
 
-    const gpio = new PiFastGpio();
-    this.gpio = gpio;
+    this.frequency = 1;
+    this.dutycycle = 0.996;
 
-    gpio.connect('localhost', 8888, (err) => {
-      if (err) throw err;
-
-      gpio.set_mode(this.tach_bcm, gpio.INPUT);
-      gpio.set_pull_up_down(this.tach_bcm, gpio.PUD_UP);
-
-      this.tachometer = new Gpio(16, { // physical #36, BCM 16
-        mode: Gpio.INPUT,
-        pullUpDown: Gpio.PUD_UP,
-        edge: Gpio.FALLING_EDGE
-      });
-      this.rpm = 0;
-      this.last_tach = process.hrtime();
-
-      gpio.callback(this.tach_bcm, gpio.FALLING_EDGE, this.onTachometer.bind(this));
-
-      gpio.set_mode(this.motor_bcm, gpio.OUTPUT);
-       
-      const dutycycle = 0.996;
-      //const dutycycle = 1.0;
-      gpio.setPwmFrequency(this.motor_bcm, 1); // to reduce impact on tach circuitry on 3-wire fans
-      gpio.setPwmDutycycle(this.motor_bcm, Math.round(dutycycle * 255));
-    }); 
+    this.helper = null;
+    this._relaunchHelper();
 
 setInterval( () => {}, 1000);
 return;
@@ -61,15 +38,23 @@ return;
       .on('set', this.setRotationSpeed.bind(this));
   }
 
-  onTachometer() {
-    const difference = process.hrtime(this.last_tach);
-    const dt = difference[0] + difference[1] / 1e9; // s + ns --> in seconds
-    if (dt < 0.02) return; // reject spuriously short pulses
+  // Relaunch the Python helper process, possibly with new arguments
+  _relaunchHelper() {
+    if (this.helper) {
+      this.helper.kill();
+      // TODO: more cleanup needed?
+    }
  
-    const freq = 1 / dt;
-    const rpm = (freq / 2) * 60;
-    console.log(rpm);
-    this.last_tach = process.hrtime();
+    this.helper = child_process.spawn('python', ['-u', 'pwmfanhelper.py', this.tach_bcm, this.motor_bcm, this.frequency, this.dutycycle])
+
+    this.helper.stderr.on('data', (err) => {
+      throw new Error(`pwmfanhelper error: ${err}`);
+    });
+
+    this.helper.stdout.on('data', (data) => {
+      this.rpm = parseInt(data);
+      console.log(`rpm: ${this.rpm}`);
+    });
   }
 
   getOn(cb) {

@@ -25,8 +25,5 @@
     "node": ">=6.0.0",
     "homebridge": ">=0.2.0"
   },
-  "homepage": "https://github.com/rxseger/homebridge-pwm-fan#readme",
-  "dependencies": {
-    "pi-fast-gpio": "^0.1.0"
-  }
+  "homepage": "https://github.com/rxseger/homebridge-pwm-fan#readme"
 }
