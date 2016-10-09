@@ -1,6 +1,7 @@
 'use strict';
 
-const Gpio = require('pigpio').Gpio;
+
+const PiFastGpio = require('pi-fast-gpio');
 
 let Service, Characteristic;
 
@@ -17,23 +18,35 @@ class FanPlugin
     this.log = log;
     this.name = config.name;
 
-    this.tachometer = new Gpio(16, { // physical #36, BCM 16
-      mode: Gpio.INPUT,
-      pullUpDown: Gpio.PUD_UP,
-      edge: Gpio.FALLING_EDGE
-    });
-    this.rpm = 0;
-    this.last_tach = process.hrtime();
-    this.tachometer.on('interrupt', this.onTachometer.bind(this));
+    this.tach_bcm = 16;  // physical #36, BCM 16
+    this.motor_bcm = 23; // physical #16, BCM 23
 
-    this.motor = new Gpio(23, { // physical #16, BCM 23
-      mode: Gpio.OUTPUT
-    });
-    const dutycycle = 0.996;
-    //const dutycycle = 1.0;
-    this.motor.pwmFrequency(1); // to reduce impact on tach circuitry on 3-wire fans
-    this.motor.pwmWrite(Math.round(dutycycle * 255));
+    const gpio = new PiFastGpio();
+    this.gpio = gpio;
 
+    gpio.connect('localhost', 8888, (err) => {
+      if (err) throw err;
+
+      gpio.set_mode(this.tach_bcm, gpio.INPUT);
+      gpio.set_pull_up_down(this.tach_bcm, gpio.PUD_UP);
+
+      this.tachometer = new Gpio(16, { // physical #36, BCM 16
+        mode: Gpio.INPUT,
+        pullUpDown: Gpio.PUD_UP,
+        edge: Gpio.FALLING_EDGE
+      });
+      this.rpm = 0;
+      this.last_tach = process.hrtime();
+
+      gpio.callback(this.tach_bcm, gpio.FALLING_EDGE, this.onTachometer.bind(this));
+
+      gpio.set_mode(this.motor_bcm, gpio.OUTPUT);
+       
+      const dutycycle = 0.996;
+      //const dutycycle = 1.0;
+      gpio.setPwmFrequency(this.motor_bcm, 1); // to reduce impact on tach circuitry on 3-wire fans
+      gpio.setPwmDutycycle(this.motor_bcm, Math.round(dutycycle * 255));
+    }); 
 
 setInterval( () => {}, 1000);
 return;
