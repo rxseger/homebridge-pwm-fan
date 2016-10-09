@@ -21,8 +21,9 @@ class FanPlugin
     this.motor_bcm = parseInt(config.motor_bcm) || 23; // physical #16, BCM 23
 
     this.frequency = parseInt(config.frequency) || 1;  // Hz
-    this.dutycycle = config.def_dutycycle !== undefined ? parseInt(config.def_dutycycle) : 255; // 0-255 = 0%-100%
+    this.def_dutycycle = config.def_dutycycle !== undefined ? parseInt(config.def_dutycycle) : 255; // 0-255 = 0%-100%
     this.min_dutycycle = config.min_dutycycle !== undefined ? parseInt(config.min_dutycycle) : 0;
+    this.dutycycle = this.def_dutycycle;
 
     this.helper = null;
     this.helperPath = path.join(__dirname, 'pwmfanhelper.py');
@@ -31,7 +32,8 @@ class FanPlugin
     this.fan = new Service.Fan(this.name);
     this.fan
       .getCharacteristic(Characteristic.On)
-      .on('get', this.getOn.bind(this));
+      .on('get', this.getOn.bind(this))
+      .on('set', this.setOn.bind(this));
     this.fan
       .getCharacteristic(Characteristic.RotationSpeed)
       .on('get', this.getRotationSpeed.bind(this))
@@ -59,6 +61,16 @@ class FanPlugin
 
   getOn(cb) {
     const on = this.rpm > 0;
+    cb(null, on);
+  }
+
+  setOn(on, cb) {
+    if (on) {
+      this.dutycycle = this.def_dutycycle;
+    } else {
+      this.dutycycle = 0; // 0% duty cycle to turn off
+    }
+    this._relaunchHelper();
     cb(null, on);
   }
 
