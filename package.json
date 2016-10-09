@@ -1,6 +1,6 @@
 {
   "name": "homebridge-pwm-fan",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "PWM-based fan control and RPM output plugin for Homebridge",
   "main": "fan.js",
   "scripts": {
