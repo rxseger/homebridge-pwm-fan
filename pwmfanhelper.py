@@ -24,20 +24,20 @@ if len(sys.argv) < 4:
 tach_pwm: tachometer pin, Broadcom number [ex: 16]
 pwm_pwm: pulse-width control pin or fan power, Broadcom number [ex: 23]
 frequency: PWM frequency (Hz) [ex: 1]
-dutycycle: PWM duty cycle (0.0 - 1.0) [ex: 0.996]
+dutycycle: PWM duty cycle (0 - 255, for 0% to 100%) [ex: 254]
 
 Outputs RPM read from tachometer on stdout, one per line
 
 Example:
 
-%s 16 23 1 0.996
+%s 16 23 1 254
 """ % (sys.argv[0], sys.argv[0]))
 	raise SystemExit
 
 TACH_BCM = int(sys.argv[1])
 PWM_BCM = int(sys.argv[2])
 frequency = int(sys.argv[3])
-dutycycle = float(sys.argv[4])
+dutycycle = int(sys.argv[4])
 
 pi = pigpio.pi() # sudo pigpiod
 
@@ -58,7 +58,7 @@ def fell(gp, level, tick):
 pi.callback(TACH_BCM, pigpio.FALLING_EDGE, fell)
 
 pi.set_PWM_frequency(PWM_BCM, frequency)
-pi.set_PWM_dutycycle(PWM_BCM, dutycycle * 255)
+pi.set_PWM_dutycycle(PWM_BCM, dutycycle)
 
 while True: time.sleep(1e9)
 

@@ -21,7 +21,7 @@ class FanPlugin
     this.motor_bcm = 23; // physical #16, BCM 23
 
     this.frequency = 1;
-    this.dutycycle = 0.996;
+    this.dutycycle = 255; // 0-255 = 0%-100%
 
     this.helper = null;
     this.helperPath = path.join(__dirname, 'pwmfanhelper.py');
@@ -52,7 +52,7 @@ class FanPlugin
 
     this.helper.stdout.on('data', (data) => {
       this.rpm = parseInt(data);
-      console.log(`rpm: ${this.rpm}`);
+      //console.log(`rpm: ${this.rpm}`);
     });
   }
 
@@ -66,14 +66,14 @@ class FanPlugin
   }
 
   setRotationSpeed(speed, cb) {
-    console.log('setRotationSpeed',speed);
-    // TODO: better translate target RPM to PWM duty cycle
-    let dutycycle = 1.0;
-    if (speed < 500) {
-      dutycycle = 0.996;
-    }
-    console.log('dutycycle',dutycycle);
-    this.motor.pwmWrite(dutycycle);
+    // speed given is a number 100 (full power) to 0
+    //console.log('setRotationSpeed',speed);
+    // scale speed by duty cycle
+    this.dutycycle = 0|(speed / 100 * 255);
+    //console.log('dutycycle',this.dutycycle);
+    this._relaunchHelper();
+
+    cb(null);
   }
 
   getServices() {
