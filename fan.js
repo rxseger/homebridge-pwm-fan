@@ -1,6 +1,7 @@
 'use strict';
 
 const child_process = require('child_process');
+const path = require('path');
 let Service, Characteristic;
 
 module.exports = (homebridge) => {
@@ -23,10 +24,8 @@ class FanPlugin
     this.dutycycle = 0.996;
 
     this.helper = null;
+    this.helperPath = path.join(__dirname, 'pwmfanhelper.py');
     this._relaunchHelper();
-
-setInterval( () => {}, 1000);
-return;
 
     this.fan = new Service.Fan(this.name);
     this.fan
@@ -45,7 +44,7 @@ return;
       // TODO: more cleanup needed?
     }
  
-    this.helper = child_process.spawn('python', ['-u', 'pwmfanhelper.py', this.tach_bcm, this.motor_bcm, this.frequency, this.dutycycle])
+    this.helper = child_process.spawn('python', ['-u', this.helperPath, this.tach_bcm, this.motor_bcm, this.frequency, this.dutycycle])
 
     this.helper.stderr.on('data', (err) => {
       throw new Error(`pwmfanhelper error: ${err}`);
