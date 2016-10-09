@@ -7,14 +7,29 @@
 
 import time
 import pigpio
+import sys
 
-TACH = 16    # BCM 16 / physical #36
-PWM_BCM = 23 # BCM 23 / physical #16
+if len(sys.argv) < 4:
+	sys.stderr.write("""usage: %s tach_bcm pwm_bcm frequency dutycycle
+
+tach_pwm: tachometer pin, Broadcom number [ex: 16]
+pwm_pwm: pulse-width control pin or fan power, Broadcom number [ex: 23]
+frequency: PWM frequency (Hz) [ex: 1]
+dutycycle: PWM duty cycle (0.0 - 1.0) [ex: 0.996]
+
+Outputs RPM read from tachometer on stdout, one per line
+""" % (sys.argv[0],))
+	raise SystemExit
+
+TACH_BCM = int(sys.argv[1])
+PWM_BCM = int(sys.argv[2])
+frequency = int(sys.argv[3])
+dutycycle = float(sys.argv[4])
 
 pi = pigpio.pi() # sudo pigpiod
 
-pi.set_mode(TACH, pigpio.INPUT)
-pi.set_pull_up_down(TACH, pigpio.PUD_UP)
+pi.set_mode(TACH_BCM, pigpio.INPUT)
+pi.set_pull_up_down(TACH_BCM, pigpio.PUD_UP)
 
 t = time.time()
 def fell(gp, level, tick):
@@ -27,12 +42,8 @@ def fell(gp, level, tick):
 	print "%.f" % (rpm,)
 	t = time.time()	
 
-pi.callback(TACH, pigpio.FALLING_EDGE, fell)
+pi.callback(TACH_BCM, pigpio.FALLING_EDGE, fell)
 
-frequency = 1
-#dutycycle = 0.50
-dutycycle = 0.996
-#dutycycle = 1.0
 pi.set_PWM_frequency(PWM_BCM, frequency)
 pi.set_PWM_dutycycle(PWM_BCM, dutycycle * 255)
 
