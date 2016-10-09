@@ -25,5 +25,8 @@
     "node": ">=6.0.0",
     "homebridge": ">=0.2.0"
   },
-  "homepage": "https://github.com/rxseger/homebridge-gpio-fan#readme"
+  "homepage": "https://github.com/rxseger/homebridge-gpio-fan#readme",
+  "dependencies": {
+    "pigpio": "^0.4.0"
+  }
 }
