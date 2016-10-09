@@ -22,6 +22,7 @@ class FanPlugin
       pullUpDown: Gpio.PUD_UP,
       edge: Gpio.FALLING_EDGE
     });
+    this.rpm = 0;
     this.last_tach = process.hrtime();
     this.tachometer.on('interrupt', this.onTachometer.bind(this));
 
@@ -59,15 +60,23 @@ return;
   }
 
   getOn(cb) {
-    // TODO
+    const on = this.rpm > 0;
+    cb(null, on);
   }
 
   getRotatonSpeed(cb) {
-    // TODO
+    cb(null, this.rpm);
   }
 
   setRotationSpeed(speed, cb) {
-    // TODO
+    console.log('setRotationSpeed',speed);
+    // TODO: better translate target RPM to PWM duty cycle
+    let dutycycle = 1.0;
+    if (speed < 500) {
+      dutycycle = 0.996;
+    }
+    console.log('dutycycle',dutycycle);
+    this.motor.pwmWrite(dutycycle);
   }
 
   getServices() {
