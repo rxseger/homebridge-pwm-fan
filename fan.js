@@ -8,7 +8,7 @@ module.exports = (homebridge) => {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
 
-  homebridge.registerAccessory('homebridge-gpio-fan', 'GPIOFan', FanPlugin);
+  homebridge.registerAccessory('homebridge-gpio-fan', 'PWMFan', FanPlugin);
 };
 
 class FanPlugin
