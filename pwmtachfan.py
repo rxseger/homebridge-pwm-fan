@@ -5,22 +5,19 @@
 # http://electronics.stackexchange.com/questions/8295/how-to-interpret-the-output-of-a-3-pin-computer-fan-speed-sensor
 # http://www.formfactors.org/developer/specs/REV1_2_Public.pdf
 
-import RPi.GPIO as GPIO
 import time
 import pigpio
 
-TACH = 36 # BCM 16
-PWM_BCM = 23 # BCM 23 / PWM
+TACH = 16    # BCM 16 / physical #36
+PWM_BCM = 23 # BCM 23 / physical #16
 
 pi = pigpio.pi() # sudo pigpiod
 
-GPIO.setmode(GPIO.BOARD)
-
-GPIO.setwarnings(False)
-GPIO.setup(TACH, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+pi.set_mode(TACH, pigpio.INPUT)
+pi.set_pull_up_down(TACH, pigpio.PUD_UP)
 
 t = time.time()
-def fell(n):
+def fell(gp, level, tick):
 	global t
 	dt = time.time() - t
 	if dt < 0.01: return # reject spuriously short pulses
@@ -30,7 +27,7 @@ def fell(n):
 	print "%.f" % (rpm,)
 	t = time.time()	
 
-GPIO.add_event_detect(TACH, GPIO.FALLING, fell)
+pi.callback(TACH, pigpio.FALLING_EDGE, fell)
 
 frequency = 1
 #dutycycle = 0.50
