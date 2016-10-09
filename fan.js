@@ -17,11 +17,12 @@ class FanPlugin
     this.log = log;
     this.name = config.name;
 
-    this.tach_bcm = 16;  // physical #36, BCM 16
-    this.motor_bcm = 23; // physical #16, BCM 23
+    this.tach_bcm = parseInt(config.tach_bcm) || 16;   // physical #36, BCM 16
+    this.motor_bcm = parseInt(config.motor_bcm) || 23; // physical #16, BCM 23
 
-    this.frequency = 1;
-    this.dutycycle = 255; // 0-255 = 0%-100%
+    this.frequency = parseInt(config.frequency) || 1;  // Hz
+    this.dutycycle = config.def_dutycycle !== undefined ? parseInt(config.def_dutycycle) : 255; // 0-255 = 0%-100%
+    this.min_dutycycle = config.min_dutycycle !== undefined ? parseInt(config.min_dutycycle) : 0;
 
     this.helper = null;
     this.helperPath = path.join(__dirname, 'pwmfanhelper.py');
@@ -70,6 +71,7 @@ class FanPlugin
     //console.log('setRotationSpeed',speed);
     // scale speed by duty cycle
     this.dutycycle = 0|(speed / 100 * 255);
+    if (this.dutycycle < this.min_dutycycle) this.dutycycle = this.min_dutycycle; // clamp to minimum TODO: return error to user if can't go this low?
     //console.log('dutycycle',this.dutycycle);
     this._relaunchHelper();
 

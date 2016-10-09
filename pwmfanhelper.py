@@ -11,6 +11,7 @@
 # TODO: a Node.js/JavaScript module to talk to pigpiod comprehensively, to replace this Python
 #
 # references:
+# http://pcbheaven.com/wikipages/How_PC_Fans_Work/
 # http://electronics.stackexchange.com/questions/8295/how-to-interpret-the-output-of-a-3-pin-computer-fan-speed-sensor
 # http://www.formfactors.org/developer/specs/REV1_2_Public.pdf
 
